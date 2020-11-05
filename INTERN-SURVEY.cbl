@@ -1,19 +1,21 @@
       ******************************************************************
       * Author: JOYCE
       * Date: 11/02/2020
-      * Purpose: SURVEY INFORMATION
+      * Purpose: IS TO CREATE A SMALL SYSTEM THAT WILLL USERS TO TAKE A SURVEY
+      *          AND STORE THE DATA ON A FILE(DATABASE) AND ALSO RETRIEVE
+      *          THE DATA BACK TO DO RELEVENT CALCULATIONS.
       * Tectonics: cobc
       ******************************************************************
        IDENTIFICATION                  DIVISION.
 
-       PROGRAM-ID.                     SURVEY1.
+       PROGRAM-ID.                     INTERN-SURVEY.
        ENVIRONMENT                     DIVISION.
 
        CONFIGURATION                   SECTION.
 
        INPUT-OUTPUT                    SECTION.
        FILE-CONTROL.
-
+      *THE NAME OF THE FILE THAT AM STORING THE DATA AND THE PRIMARY KEY WILL THE USER ID.
            SELECT  SURVEY-DATA         ASSIGN TO "SURVEY-DATA.TXT"
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
@@ -23,6 +25,7 @@
        DATA                            DIVISION.
 
        FILE                            SECTION.
+      *FD STRUCTURE FOR THE FILE OF DATA....
        FD SURVEY-DATA.
        01  DATA-REC.
            05 PERSONAL-DETAILS.
@@ -30,7 +33,10 @@
              10 WS-NAME                PIC X(20).
              10 WS-FIRST-NAMES         PIC X(30).
              10 WS-CONTACT-NUMBER      PIC 9(10).
-             10 WS-DATE                PIC 9(08).
+             10 WS-DATE.
+                15 WS-MM               PIC 99.
+                15 WS-DD               PIC 99.
+                15 WS-YEAR             PIC 9999.
              10 WS-AGE                 PIC 99.
            05  WS-FAVOURITE-FOOD.
              10 WS-FAVOUR-PIZZA        PIC X.
@@ -66,6 +72,7 @@
                15 RADIO-SCAL5          PIC X.
 
        WORKING-STORAGE                 SECTION.
+      *VARIALES I HAVE USED FOR THE PROGRAM......
        01  RESPONSEZ.
            05  RESPONSE-IN-WS          PIC X.
 
@@ -99,42 +106,53 @@
        01 WS-TEMP-AGE                  PIC 99.
        SCREEN SECTION.
        01 MAIN-SCREEN.
+      *THE MAIN SCREEN......
            05  VALUE "WELCOME " BLANK SCREEN             LINE 2 COL 50.
+            05  VALUE "----------------------"           LINE 3 COL 42.
            05  VALUE "1) Fill out survey"                LINE 5 COL 42.
            05  VALUE "2) View survey results"            LINE 6 COL 42.
            05  OPTION-INPUT                              LINE 8 COL 50
                                        PIC  9      TO WS-OPTION-RESPOND.
-
+      *SECOND SCREEN......
        01  DATA-ENTRY-SCREEN.
            05  VALUE "TAKE OUR SURVEY " BLANK SCREEN     LINE 1 COL 2.
-           05  VALUE "Personal Details :"                LINE 3 COL 2.
-           05  VALUE "* ID NUMBER      :"                LINE 5 COL 10.
+           05  VALUE "Personal Details  :"               LINE 3 COL 2.
+           05  VALUE "* ID NUMBER       :"               LINE 5 COL 10.
            05  ID-INPUT                                  LINE 5 COL 35
                                        PIC  9(13)  TO WS-ID.
 
-           05  VALUE "Surname          :"                LINE 7 COL 10.
+           05  VALUE "Surname           :"               LINE 7 COL 10.
            05  SURNAME-INPUT                             LINE 7 COL 35
                                        PIC  X(30)  TO WS-NAME.
 
-           05  VALUE "First Names      :"                LINE 9 COL 10.
+           05  VALUE "First Names       :"               LINE 9 COL 10.
            05  NAMES-INPUT                               LINE 9 COL 35
                                        PIC X(30)   TO WS-FIRST-NAMES.
 
-           05  VALUE "Contact Number   :"                LINE 11 COL 10.
+           05  VALUE "Contact Number    :"               LINE 11 COL 10.
            05  CONTACT-INPUT                             LINE 11 COL 35
                                        PIC 9(10)   TO WS-CONTACT-NUMBER.
 
-           05  VALUE "Date             :"                LINE 13 COL 10.
-           05  DATE-INPUT                                LINE 13 COL 35
-                                       PIC 9(08)   TO WS-DATE.
 
-           05  VALUE "Age              :"                LINE 15 COL 10.
+           05  VALUE "Date(MM/DD/YYYY)  :"               LINE 13 COL 10.
+           05  MM-INPUT                                  LINE 13 COL 35
+                                       PIC 9(02)   TO WS-MM.
+           05  VALUE "/"                                 LINE 13 COL 37.
+           05  DD-INPUT                                  LINE 13 COL 38
+                                       PIC 9(02)   TO WS-DD.
+           05  VALUE "/"                                 LINE 13 COL 40.
+           05  YEAR-INPUT                                LINE 13 COL 41
+                                       PIC 9(04)   TO WS-YEAR.
+
+           05  VALUE "Age               :"               LINE 15 COL 10.
            05  NAMES-INPUT                               LINE 15 COL 35
                                        PIC 9(02)   TO WS-AGE.
 
            05  VALUE
            "What is your favourite food? (YOU CAN CHOOSE MORE THAN 1)"
                                                          LINE 17 COL 2.
+           05  VALUE
+           "NOTE: ****** CHOOSE BY USING AN X"           LINE 17 COL 65.
            05  VALUE "Pizza"                             LINE 18 COL 10.
            05  CHOICE1-INPUT                             LINE 18 COL 7
                                        PIC  X      TO WS-FAVOUR-PIZZA.
@@ -159,19 +177,20 @@
            05  CHOICE6-INPUT                             LINE 23 COL 7
                                        PIC  X      TO WS-OTHER-FAV.
 
-           05  VALUE "ENTER (Y) TO CONTINUE >>>>"        LINE 24 COL 45.
-           05  RESPONSE-INPUT                            LINE 24 COL 74
+           05  VALUE "ENTER (Y) TO CONTINUE >>>>"        LINE 25 COL 45.
+           05  RESPONSE-INPUT                            LINE 25 COL 74
                                        PIC X       TO RESPONSE-IN-WS.
-           05 ERR-INPUT                                  LINE 26 COL 35
+           05 ERR-INPUT                                  LINE 27 COL 35
                                        PIC X(100)   FROM ERR-MESSAGE.
 
 
-
+      *SECOND SCREEN CONTINUED....
        01  DATA-ENTRY2-SCREEN.
            05  VALUE "CONTINUE......" BLANK SCREEN       LINE 1 COL 2.
            05  VALUE
            "scale FROM 1 to 5 indicate whether you agree or disagree"
      -                                                   LINE 2 COL 2.
+           05  VALUE "****FILL IN WITH X "               LINE 3 COL 2.
            05  VALUE "STRONGLY AGREE"                    LINE 4 COL 35.
            05  VALUE "AGREE"                             LINE 4 COL 55.
            05  VALUE "NEUTRAL"                           LINE 4 COL 65.
@@ -179,27 +198,27 @@
            05  VALUE "STRONGY DISAGREE"                  LINE 4 COL 85.
 
            05 VALUE "I like to eat out"                  LINE 5 COL 5.
-           05 STR-AGREE1                                  LINE 5 COL 40
+           05 STR-AGREE1                                 LINE 5 COL 40
                                       PIC X        TO OUT-SCAL1.
-           05 AGREE1                                      LINE 5 COL 57
+           05 AGREE1                                     LINE 5 COL 57
                                       PIC X        TO OUT-SCAL2.
-           05 NEUTRAL1                                    LINE 5 COL 67
+           05 NEUTRAL1                                   LINE 5 COL 67
                                       PIC X        TO OUT-SCAL3.
-           05 DISAGREE1                                   LINE 5 COL 78
+           05 DISAGREE1                                  LINE 5 COL 78
                                       PIC X        TO OUT-SCAL4.
-           05 STR-DISAGREE1                               LINE 5 COL 90
+           05 STR-DISAGREE1                              LINE 5 COL 90
                                       PIC X        TO OUT-SCAL5.
 
-           05 VALUE "I like to watch movies"              LINE 7 COL 5.
-           05 STR-AGREE2                                  LINE 7 COL 40
+           05 VALUE "I like to watch movies"             LINE 7 COL 5.
+           05 STR-AGREE2                                 LINE 7 COL 40
                                       PIC X        TO MOVIE-SCAL1.
-           05 AGREE2                                      LINE 7 COL 57
+           05 AGREE2                                     LINE 7 COL 57
                                       PIC X        TO MOVIE-SCAL2.
-           05 NEUTRAL2                                    LINE 7 COL 67
+           05 NEUTRAL2                                   LINE 7 COL 67
                                       PIC X        TO MOVIE-SCAL3.
-           05 DISAGREE2                                   LINE 7 COL 78
+           05 DISAGREE2                                  LINE 7 COL 78
                                       PIC X        TO MOVIE-SCAL4.
-           05 STR-DISAGREE2                               LINE 7 COL 90
+           05 STR-DISAGREE2                              LINE 7 COL 90
                                       PIC X        TO MOVIE-SCAL5.
 
            05 VALUE "I like to watch TV"                  LINE 9 COL 5.
@@ -229,6 +248,9 @@
            05  VALUE "ENTER (Y) TO SUBMIT >>>>"          LINE 24 COL 45.
            05  RESPONSE-INPUT                            LINE 24 COL 74
                                        PIC X       TO RESPONSE-IN-WS.
+
+
+      *THIRD SCREEN......
        01 RESULTS-SCREEN.
            05  VALUE "RESULTS OF THE SURVEY" BLANK SCREEN LINE 2 COL 40.
            05  VALUE "Total number of surveys:"           LINE 4 COL 10.
@@ -292,65 +314,87 @@
 
        PROCEDURE                       DIVISION.
 
-       MAIN-PROCEDURE                  SECTION.
-
+       AA000-MAIN-PROCEDURE            SECTION.
+      *OPENING THE FILE WHERE AM GOING TO STORE THE SURVEY DATA AND ALSO TO BE ABLE TO READ THE DATA...
            OPEN I-O SURVEY-DATA.
 
-
+      *DISPLAYING THE MAIN SCREEN TO CHOOSE WHETHER YOU TAKE A SURVEY OR CHECK SURVEYS RESULTS...
            DISPLAY MAIN-SCREEN
            ACCEPT MAIN-SCREEN
 
+      *EVALUATING THE OPTION YOU HAVE CHOSEN AND THEN TAKE YOU TO THE RELEVENT SCREEN...
+      *WHEN YOU CHOOSE OPTION 1 IT WILL TAKE YOU TO THE TAKE SURVEY SECTION...
+      *WHEN YOU CHOOSE OPTION 2 IT WILL TAKE YOU TO THE RESULTS OF THE SURVEY SECTION
            EVALUATE WS-OPTION-RESPOND
              WHEN 1
-               PERFORM TAKE-A-SURVEY
+               PERFORM BA000-TAKE-A-SURVEY
              WHEN 2
-               PERFORM VIEW-SURVEY-RESULTS
+               PERFORM CA000-VIEW-SURVEY-RESULTS
            END-EVALUATE.
 
+      *CLOSING THE FILE AT THE END OF THE PROGRAM......
            CLOSE SURVEY-DATA.
            STOP RUN.
 
-       TAKE-A-SURVEY                   SECTION.
+       BA000-TAKE-A-SURVEY             SECTION.
+      *DISPLAYING THE TAKE A SURVEY SCREEN WHERE YOU WILL INPUT YOUR DATA......
            DISPLAY DATA-ENTRY-SCREEN.
            ACCEPT DATA-ENTRY-SCREEN.
 
+      *WHEN YOU ENTER "Y" TO CONTINUE YOU WILL CONTINUE WITH THE SURVEY.....
+      *IF YOU PUT SOMETHING ELSE IT WILL GIVE YOU AN ERROR MESSAGE....
              IF RESPONSE-IN-WS         = "Y"
-                 DISPLAY DATA-ENTRY2-SCREEN
-                 ACCEPT DATA-ENTRY2-SCREEN
+                 PERFORM GA000-VALIDATIONS
+                 IF ERR-MESSAGE NOT = SPACES
+                    DISPLAY DATA-ENTRY-SCREEN
+                    ACCEPT DATA-ENTRY-SCREEN
+                  ELSE
+                   DISPLAY DATA-ENTRY2-SCREEN
+                   ACCEPT DATA-ENTRY2-SCREEN
+                 END-IF
               ELSE
-                 MOVE "ERROR"          TO ERR-MESSAGE
+                 MOVE "ENTER (Y) TO CONTINUE"     TO ERR-MESSAGE
                  DISPLAY DATA-ENTRY-SCREEN
                  ACCEPT DATA-ENTRY-SCREEN
+
            END-IF.
+
+      *AFTER FILLING IN YOUR DETAILS IT WILL WRITE YOUR DATA AND YOUR RATINGS TO THE FILE....
            WRITE DATA-REC.
 
 
-       VIEW-SURVEY-RESULTS             SECTION.
-           PERFORM CALCULATE-TOTAL.
+       CA000-VIEW-SURVEY-RESULTS       SECTION.
+      *WHEN YOU CHOOSED TO VIEW RESULTS OF SURVEY IT WILL FIRST CALCULATE THE TOTALS THEN DISPLAY THE RESULTS TO YOU
+      *THE PERFORM STATEMENT WILL CALL THE CALCULATIONS SECTION...
+           PERFORM DA000-CALCULATE-TOTAL.
            DISPLAY RESULTS-SCREEN.
            ACCEPT RESULTS-SCREEN.
 
+      *WHEN YOU ENTER "Y" FOR OK IT WILL TAKE YOU BACK TO THE MAIN SCREEN.....
              IF WS-OK                  = "Y"
                 DISPLAY MAIN-SCREEN
                 ACCEPT MAIN-SCREEN
              END-IF.
 
-       CALCULATE-TOTAL                 SECTION.
+       DA000-CALCULATE-TOTAL           SECTION.
+      *THIS SECTION WILL FIRST READ FROM THE FILE TO DO THE CALCULATIONS......
            MOVE LOW-VALUES             TO WS-EOF.
            PERFORM ZA000-READ-FILE.
 
+      * IT WILL DO THE PERFORM STATEMENT UNTIL END OF FILE WILL DOING THE CALCULATIONS...
            PERFORM UNTIL WS-EOF        = HIGH-VALUES
               ADD 01                   TO WS-SURVEY-COUNT
               COMPUTE WS-TOTAL-AGE     = WS-AGE + WS-TOTAL-AGE
               COMPUTE WS-AVAG-AGE      = WS-TOTAL-AGE / WS-SURVEY-COUNT
-              PERFORM HIGHEST-AND-LOWEST
+              PERFORM EA000-HIGHEST-AND-LOWEST
               PERFORM ZA000-READ-FILE
            END-PERFORM.
 
            CLOSE SURVEY-DATA.
 
 
-       HIGHEST-AND-LOWEST              SECTION.
+       EA000-HIGHEST-AND-LOWEST        SECTION.
+      *CHECKING FOR THE HIGHEST AND LOWEST AGE .........
            IF WS-MAX-AGE = 0           AND WS-MIN-AGE = 0
                MOVE WS-AGE             TO WS-MAX-AGE
                MOVE WS-AGE             TO WS-MIN-AGE
@@ -363,9 +407,12 @@
                     END-IF
                 END-IF
            END-IF.
-           PERFORM FOOD-PERCENTAGE.
 
-       FOOD-PERCENTAGE                 SECTION.
+      *CALL SECTION TO CALCULATE THE PERCENTAGE OF FOOD PEOPLE LIKE.....
+           PERFORM FA000-FOOD-PERCENTAGE.
+
+       FA000-FOOD-PERCENTAGE           SECTION.
+      *CHECKING WHICH FOOD THE LOVE AND ADD TOTALS ACCORDING TO GET THE PERCENTAGE....
            IF WS-FAVOUR-PIZZA          = "X"
                ADD 01                  TO PIZZA-COUNT
             ELSE
@@ -378,12 +425,14 @@
                END-IF
            END-IF.
 
+      *CALCULATING THE PERCENTAGE OF PEOPLE WHO LIKE PIZZA, PASTA, AND PAP&WORS.....
            COMPUTE WS-PERC-PIZZA = PIZZA-COUNT/WS-SURVEY-COUNT * 100.
            COMPUTE WS-PERC-PASTA = PASTA-COUNT/WS-SURVEY-COUNT * 100.
            COMPUTE WS-PERC-PAP = PAP-N-WORS-COUNT/WS-SURVEY-COUNT * 100.
-           PERFORM AVERAGE0FRATING.
+           PERFORM HA000-AVERAGE0FRATING.
 
-       AVERAGE0FRATING                  SECTION.
+       HA000-AVERAGE0FRATING                  SECTION.
+      *CHECK PEOPLE WHO AGREED AND STRONGLY AGREE TO GET THE TOTAL NUMBER OF PEOPLE ACCORDING TO WHAT THEY LIKE..
            IF OUT-SCAL1 = "X"           OR OUT-SCAL2 = "X"
                ADD 01                   TO OUT-COUNT
             ELSE
@@ -400,12 +449,45 @@
                END-IF
            END-IF.
 
+      *CALCULATING THE AVERAGE OF RATING.........
            COMPUTE WS-OUT-AVAG          = OUT-COUNT / WS-SURVEY-COUNT.
            COMPUTE WS-MOVIE-AVAG        = MOVIES-COUNT/WS-SURVEY-COUNT.
            COMPUTE WS-TV-AVAG           = TV-COUNT / WS-SURVEY-COUNT.
            COMPUTE WS-RADIO-AVAG        = RADIO-COUNT/WS-SURVEY-COUNT.
 
+       GA000-VALIDATIONS               SECTION.
+      *TEXT FIELDS CAN'T BE BLANK....
+           IF WS-ID = SPACES
+              MOVE "MISSING ID"        TO ERR-MESSAGE
+           END-IF.
+
+           IF WS-NAME                  = SPACES
+              MOVE "SURNAME MISSING"   TO ERR-MESSAGE
+           END-IF.
+
+
+           IF WS-FIRST-NAMES           = SPACES
+              MOVE "NAMES MISSING"     TO ERR-MESSAGE
+           END-IF.
+
+           IF WS-CONTACT-NUMBER        = SPACES
+              MOVE "CELLPHONE MISSING" TO ERR-MESSAGE
+           END-IF.
+
+           IF WS-DATE = SPACES
+              MOVE "DATE MISSING"      TO ERR-MESSAGE
+            END-IF
+
+           PERFORM IA000-AGE-VALIDATION.
+
+       IA000-AGE-VALIDATION            SECTION.
+      *CHECKING IF THE AGE IS LESS THAN 5 OR GREATER THAN 120...
+           IF WS-AGE < 5 OR WS-AGE > 120
+              MOVE "AGE CAN NOT BE LESS THAN 5 OR GREATER THAN 120"
+                                        TO ERR-MESSAGE.
+
        ZA000-READ-FILE                  SECTION.
+      *READ THE DATA OFTHE SURVEY TO DO CALCULATIONS......
            READ SURVEY-DATA             NEXT RECORD
               AT END
                  MOVE HIGH-VALUES       TO WS-EOF.
